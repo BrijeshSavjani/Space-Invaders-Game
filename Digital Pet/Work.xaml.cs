@@ -26,7 +26,7 @@ namespace SpaceInvaders
         public Random rnd = new Random();
         public bool isUserFiring;
         public List<System.Windows.Controls.Image> current_alien_bullets = new List<System.Windows.Controls.Image>();
-
+        public double OrignalPlaneMargin;
         public Work()
         {
             InitializeComponent();
@@ -60,10 +60,10 @@ namespace SpaceInvaders
         }
         public void Shoot(System.Windows.Controls.Image bullet, bool GoingUp)
         {
-            var margin_difference = new Thickness(0, bullet.Margin.Top - 4, 0, 0);
-            if (GoingUp == true) { margin_difference = new Thickness(0, 0, 0, bullet.Margin.Bottom + 4); }
+            var margin_difference = new Thickness(OrignalPlaneMargin, bullet.Margin.Top - 4, 0, 0);
+            if (GoingUp == true) { margin_difference = new Thickness(OrignalPlaneMargin, 0, 0, bullet.Margin.Bottom + 4); }
             if ((int)bullet.Margin.Top == -16 | bullet.Margin.Bottom == 16) 
-            {ChangeRow(bullet, GoingUp); margin_difference = new Thickness(0); }
+            {ChangeRow(bullet, GoingUp); margin_difference = new Thickness(OrignalPlaneMargin,0,0,0); }
             bullet.Margin = margin_difference;
             Score.Content = "Row: " + Bullet.GetValue(Grid.RowProperty).ToString() + "Margin: " + Bullet.Margin.Bottom.ToString();
         }
@@ -110,14 +110,19 @@ namespace SpaceInvaders
             foreach (System.Windows.Controls.Image bullet in current_alien_bullets)
             {
                 Shoot(bullet, false);
-                bool a = false;
-                if ((int)bullet.GetValue(Grid.RowProperty) == 4) {a = isHitting(bullet, Plane);}
-
-                if (a == true)
+                bool PlaneShot = false;
+                if ((int)bullet.GetValue(Grid.RowProperty) == 4) { PlaneShot = isHitting(bullet, Plane); }
+                if (PlaneShot == true){ GameOver(); }
+                bool AlienShot = false;
+                foreach (UIElement alien in AlienGrid.Children)
                 {
-                    Score.Content = "L";
-                    GameOver();
+                    if (alien.Visibility != Visibility.Collapsed)
+                    {
+                        AlienShot = isHitting(alien, Bullet);
+                        if (AlienShot == true) { alien.Visibility = Visibility.Collapsed;break; }
+                    }
                 }
+
             }
             if(isUserFiring == true) { 
                 Shoot(Bullet, true); }
@@ -139,6 +144,7 @@ namespace SpaceInvaders
                 {
                     isUserFiring = true;
                     Bullet.Margin = Plane.Margin;
+                    OrignalPlaneMargin = Plane.Margin.Left;
                     Bullet.Visibility = Visibility.Visible;
                 }
                
