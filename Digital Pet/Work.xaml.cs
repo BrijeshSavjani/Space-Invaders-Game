@@ -24,7 +24,7 @@ namespace SpaceInvaders
         public System.Windows.Threading.DispatcherTimer GameTimer = new System.Windows.Threading.DispatcherTimer();
         public int ship_margin_rate = 4;
         public Random rnd = new Random();
-        public bool isFiring;
+        public bool isUserFiring;
         public List<System.Windows.Controls.Image> current_alien_bullets = new List<System.Windows.Controls.Image>();
 
         public Work()
@@ -61,9 +61,11 @@ namespace SpaceInvaders
         public void Shoot(System.Windows.Controls.Image bullet, bool GoingUp)
         {
             var margin_difference = new Thickness(0, bullet.Margin.Top - 4, 0, 0);
-            if (GoingUp == true) { margin_difference = new Thickness(0, 0, 0, bullet.Margin.Top + 4); }
-            if ((int)bullet.Margin.Top == -16) { ChangeRow(bullet, false); margin_difference.Top = 0; }
+            if (GoingUp == true) { margin_difference = new Thickness(0, 0, 0, bullet.Margin.Bottom + 4); }
+            if ((int)bullet.Margin.Top == -16 | bullet.Margin.Bottom == 16) 
+            {ChangeRow(bullet, GoingUp); margin_difference = new Thickness(0); }
             bullet.Margin = margin_difference;
+            Score.Content = "Row: " + Bullet.GetValue(Grid.RowProperty).ToString() + "Margin: " + Bullet.Margin.Bottom.ToString();
         }
         public void AlienBullet()
         {
@@ -75,7 +77,6 @@ namespace SpaceInvaders
                 {
                     if (bullet.Visibility == Visibility.Collapsed)
                     {
-                        isFiring = true;
                         current_alien_bullets.Add(bullet);
                         bullet.Margin = AlienGrid.Margin;
                         bullet.SetValue(Grid.RowProperty, AlienGrid.GetValue(Grid.RowProperty));
@@ -109,7 +110,8 @@ namespace SpaceInvaders
             foreach (System.Windows.Controls.Image bullet in current_alien_bullets)
             {
                 Shoot(bullet, false);
-                var a = isHitting(bullet, Plane);
+                bool a = false;
+                if ((int)bullet.GetValue(Grid.RowProperty) == 4) {a = isHitting(bullet, Plane);}
 
                 if (a == true)
                 {
@@ -117,6 +119,8 @@ namespace SpaceInvaders
                     GameOver();
                 }
             }
+            if(isUserFiring == true) { 
+                Shoot(Bullet, true); }
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -128,6 +132,16 @@ namespace SpaceInvaders
             if (e.Key == Key.Left)
             {
                 Plane.Margin = new Thickness(Plane.Margin.Left - 4, 0, 0, 0);//If lft arrow is pressed then move to the left by 2
+            }
+            if (e.Key == Key.Space)
+            {
+                if (isUserFiring == false)
+                {
+                    isUserFiring = true;
+                    Bullet.Margin = Plane.Margin;
+                    Bullet.Visibility = Visibility.Visible;
+                }
+               
             }
         }
     }
