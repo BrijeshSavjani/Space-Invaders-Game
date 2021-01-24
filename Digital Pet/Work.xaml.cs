@@ -121,7 +121,7 @@
             {
                 Shoot(bullet, false, 0);
                 bool PlaneShot = false;
-                if ((int)bullet.GetValue(Grid.RowProperty) == 4) { PlaneShot = isHitting(bullet, Plane); Score.Content = PlaneShot.ToString(); ResetBullet(bullet, 0);}
+                if ((int)bullet.GetValue(Grid.RowProperty) == 4) { PlaneShot = isHitting(bullet, Plane); ResetBullet(bullet, 0);}
                 if (PlaneShot){ GameOver();}
                 bool AlienShot = false;
                 foreach (UIElement alien in AlienGrid.Children)
@@ -155,7 +155,6 @@
                 {
                     if (isUserFiring == false)
                     {
-                        MessageBox.Show("Shot");
                         isUserFiring = true;
                         Bullet.Margin = Plane.Margin;
                         OriginalPlaneMargin = Plane.Margin.Left;
