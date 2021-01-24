@@ -69,7 +69,7 @@
                     ChangeRow(bullet, GoingUp); margin_difference = new Thickness(OrignalMargin,0,0,0); 
                 }
                 bullet.Margin = margin_difference;
-                Score.Content = "Row: " + Bullet.GetValue(Grid.RowProperty).ToString() + "Margin: " + Bullet.Margin.Bottom.ToString();
+               
             }
             public void ResetBullet(System.Windows.Controls.Image bullet, int row)
             {
@@ -113,30 +113,33 @@
                 if ((int)AlienGrid.Margin.Left == 160 || (int)AlienGrid.Margin.Left == 0 & ship_margin_rate < 0) { ChangeRow(AlienGrid, false); ship_margin_rate = ship_margin_rate * -1; }
             }
 
-            private void GameTimer_Tick(object sender, EventArgs e)
+        private void GameTimer_Tick(object sender, EventArgs e)
+        {
+            MoveAliens();
+            AlienBullet();
+            foreach (System.Windows.Controls.Image bullet in current_alien_bullets)
             {
-                MoveAliens();
-                AlienBullet();
-                foreach (System.Windows.Controls.Image bullet in current_alien_bullets)
+                Shoot(bullet, false, 0);
+                bool PlaneShot = false;
+                if ((int)bullet.GetValue(Grid.RowProperty) == 4) { PlaneShot = isHitting(bullet, Plane); Score.Content = PlaneShot.ToString(); ResetBullet(bullet, 0);}
+                if (PlaneShot){ GameOver();}
+                bool AlienShot = false;
+                foreach (UIElement alien in AlienGrid.Children)
                 {
-                    Shoot(bullet, false,0);
-                    bool PlaneShot = false;
-                    if ((int)bullet.GetValue(Grid.RowProperty) == 4) { PlaneShot = isHitting(bullet, Plane); ResetBullet(bullet, 0); break; }
-                    if (PlaneShot == true){ GameOver(); }
-                    bool AlienShot = false;
-                    foreach (UIElement alien in AlienGrid.Children)
+                    if (alien.Visibility != Visibility.Collapsed)
                     {
-                        if (alien.Visibility != Visibility.Collapsed)
-                        {
-                            AlienShot = isHitting(alien, Bullet);
-                            if (AlienShot == true) { alien.Visibility = Visibility.Collapsed;ResetBullet(Bullet, 4 );isUserFiring = false; break; }
-                        }
+                        AlienShot = isHitting(alien, Bullet);
+                        if (AlienShot == true) { alien.Visibility = Visibility.Collapsed; ResetBullet(Bullet, 4); isUserFiring = false; }
                     }
-
                 }
-                if(isUserFiring == true) { 
-                    Shoot(Bullet, true,OriginalPlaneMargin); }
+
             }
+            if (isUserFiring == true)
+            {
+                if ((int)Bullet.GetValue(Grid.RowProperty) == 0 & Bullet.Margin.Bottom >= 15) { ResetBullet(Bullet, 4); isUserFiring = false; }
+                Shoot(Bullet, true, OriginalPlaneMargin);
+            }
+        }
 
             private void Window_KeyDown(object sender, KeyEventArgs e)
             {
@@ -152,6 +155,7 @@
                 {
                     if (isUserFiring == false)
                     {
+                        MessageBox.Show("Shot");
                         isUserFiring = true;
                         Bullet.Margin = Plane.Margin;
                         OriginalPlaneMargin = Plane.Margin.Left;
