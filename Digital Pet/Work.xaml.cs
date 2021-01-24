@@ -26,6 +26,7 @@
             public Random rnd = new Random();
             public bool isUserFiring;
             public List<System.Windows.Controls.Image> current_alien_bullets = new List<System.Windows.Controls.Image>();
+            public List<int> current_allien_bullet_margins = new List<int> { };
             public double OriginalPlaneMargin;
            
             public Work()
@@ -88,13 +89,18 @@
                         if (bullet.Visibility == Visibility.Collapsed)
                         {
                             current_alien_bullets.Add(bullet);
+                            int random_margin = rnd.Next(0, (int)Math.Abs((AlienGrid.Margin.Left/2)));
+                            random_margin = (int)AlienGrid.Margin.Left - random_margin;
+                            if (random_margin % 2 == 0) { random_margin = random_margin + (int)AlienGrid.Margin.Left;}
+                            current_allien_bullet_margins.Add(random_margin);
                             bullet.Margin = AlienGrid.Margin;
                             bullet.SetValue(Grid.RowProperty, AlienGrid.GetValue(Grid.RowProperty));
                             bullet.Visibility = Visibility.Visible;
 
                         }
                     }
-                }
+                   
+            }
 
 
             }
@@ -117,9 +123,11 @@
         {
             MoveAliens();
             AlienBullet();
+            int index = 0;
             foreach (System.Windows.Controls.Image bullet in current_alien_bullets)
             {
-                Shoot(bullet, false, 0);
+                double random_margin = (double)current_allien_bullet_margins[index];
+                Shoot(bullet, false, random_margin);
                 bool PlaneShot = false;
                 if ((int)bullet.GetValue(Grid.RowProperty) == 4) { PlaneShot = isHitting(bullet, Plane); ResetBullet(bullet, 0);}
                 if (PlaneShot){ GameOver();}
@@ -132,24 +140,25 @@
                         if (AlienShot == true) { alien.Visibility = Visibility.Collapsed; ResetBullet(Bullet, 4); isUserFiring = false; }
                     }
                 }
-
+                index = index + 1;
             }
             if (isUserFiring == true)
             {
                 if ((int)Bullet.GetValue(Grid.RowProperty) == 0 & Bullet.Margin.Bottom >= 15) { ResetBullet(Bullet, 4); isUserFiring = false; }
                 Shoot(Bullet, true, OriginalPlaneMargin);
             }
+            
         }
 
             private void Window_KeyDown(object sender, KeyEventArgs e)
             {
                 if (e.Key == Key.Right)//If right arrow is pressed then move to the right by 2
                 {
-                    Plane.Margin = new Thickness(Plane.Margin.Left + 4, 0, 0, 0);
+                    Plane.Margin = new Thickness(Plane.Margin.Left + 6, 0, 0, 0);
                 }
                 if (e.Key == Key.Left)
                 {
-                    Plane.Margin = new Thickness(Plane.Margin.Left - 4, 0, 0, 0);//If lft arrow is pressed then move to the left by 2
+                    Plane.Margin = new Thickness(Plane.Margin.Left - 6, 0, 0, 0);//If lft arrow is pressed then move to the left by 2
                 }
                 if (e.Key == Key.Space)
                 {
